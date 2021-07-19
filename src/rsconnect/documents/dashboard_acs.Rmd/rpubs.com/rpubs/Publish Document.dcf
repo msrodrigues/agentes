@@ -1,0 +1,11 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/791054/cd1929ce5e1b4d00bfbdd6b8faf80df5
+bundleId: https://api.rpubs.com/api/v1/document/791054/cd1929ce5e1b4d00bfbdd6b8faf80df5
+url: http://rpubs.com/msrodrigues/791054
+when: 1626570839.55167
+lastSyncTime: 1626570839.55169
