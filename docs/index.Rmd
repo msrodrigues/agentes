@@ -42,7 +42,7 @@ options(scipen = 999999)
 Sys.setlocale("LC_TIME", "pt_BR")
 
 
-
+# Carregamento dos dados
 acs <- read_rds(file = "../bin/acs.rds")
 acs_ativos <- read_rds(file = "../bin/acs_ativos.rds")
 us <- read_rds(file = "../bin/us.rds")
@@ -77,8 +77,6 @@ clt_excedentes <- us %>%
   ) %>% 
   filter(balanco < 0)
 
-clt_excedentes
-sum(clt_excedentes$clt_necessarios)
 
 us_balanco2 <- us %>% 
   select(nome_limpo_us, precisa = acs_necessarios, em51 = acs_51, clt = acs_imesf) %>% 
@@ -103,10 +101,24 @@ us_balanco2 <- us %>%
   relocate(vagas_apos_subtrair_clt, .after = clt)
 
 
-# Calculo do Excedente de CLT
-us_balanco2 %>% 
-  pull(vagas_apos_subtrair_clt) %>% sum()
+# Quantidade de ACS para completar pelo menos 1 por equipe
+acs_para_completar_1_por_equipe <- us %>% 
+  select(us_nome, n_equipes, acs_51, acs_imesf) %>% 
+  mutate(
+    tem = acs_51 + acs_imesf,
+    balanco_1_por_equipe = n_equipes - tem
+  ) %>% 
+  filter(balanco_1_por_equipe > 0) %>% 
+  pull(balanco_1_por_equipe) %>% abs %>% sum
 
+acs_para_completar_1_por_equipe_df <- us %>% 
+  select(nome_limpo_us, n_equipes, acs_51, acs_imesf) %>% 
+  mutate(
+    tem = acs_51 + acs_imesf,
+    balanco_1_por_equipe = n_equipes - tem
+  ) %>% 
+  filter(balanco_1_por_equipe > 0) %>% 
+  select(unidade = nome_limpo_us, precisa = balanco_1_por_equipe)
 
 ```
 
@@ -202,7 +214,7 @@ n_desligavel <- sum(final$demitir)
 
 valueBox(n_desligavel, 
          icon = "fa-user-times",
-         color =  "orangered", href = "#tabela")
+         color =  "orangered", href = "#tabelas")
 ```
 
 
@@ -226,7 +238,7 @@ valueBox(glue::glue("{n_em51_completam_esf} ESF"),
 
 ```{r}
 
-valueBox(glue::glue("{n_exedentes_em51} exedentes"), 
+valueBox(glue::glue("{n_exedentes_em51} ACS"), 
          icon = "fa-user-times",
          color = "seagreen")
 ```
@@ -253,32 +265,47 @@ valueBox(glue::glue("{vagas_clt} vagas"),
 
 
 
-### Equipes SEM ACS
+### Unidades SEM ACS
 
 ```{r}
 
 n_equipes_sem_ACS <- sum(!us_balanco2$flag_completa)
-valueBox(glue::glue("{n_equipes_sem_ACS} Equipes"), 
+valueBox(glue::glue("{n_equipes_sem_ACS} US"), 
          icon = "fa-search",
          color =  "orangered")
 ```
 
-### 
+### ACS para completar equipes
 
 ```{r}
-valueBox(" ", 
+
+valueBox(glue::glue("{acs_para_completar_1_por_equipe} ACS "), 
          icon = "fa-",
-         color =  "pink")
+         color =  "orangered")
 ```
 
 
 Row {data-width=350}
 -----------------------------------------------------------------------
 
-### Equipes sem ACS
+### Quantidade de ACS para completar equipes
 
 ```{r}
 
+acs_para_completar_1_por_equipe_df %>% 
+  reactable( 
+    columns = list(
+      unidade = colDef(name = "Nome da Unidade", minWidth = 200),
+      precisa = colDef(name = "Vagas p/ comp. ESF", minWidth = 80, align = "center")
+    ),
+    bordered = TRUE,
+    highlight = TRUE, 
+    striped = TRUE,
+    searchable = TRUE,
+    defaultPageSize = 15,
+    minRows = 15,
+    showPageSizeOptions = TRUE
+  )
 ```
 
 
@@ -307,9 +334,13 @@ reactable(
 
 ```
 
-Tabela
+Tabelas 
 =================================================================================
-### Tabela de Agentes Comunitarios
+
+
+row{.tabset}
+--------------------------------------------------------
+### Unidades com seus Agentes Comunitarios 
 
 ```{r}
 
@@ -363,6 +394,21 @@ reactable(
 )
 
 ```
+
+### Equipes sem ACS 
+
+
+```{r}
+
+demanda %>% 
+  nest(no_equipe, equipe, ) %>% 
+  mutate(
+    vagas = map_dbl(data, nrow)
+  ) %>% reactable()
+
+
+```
+
 
 Unidades
 =================================================================================
