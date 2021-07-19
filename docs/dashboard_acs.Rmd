@@ -1,0 +1,441 @@
+---
+title: "Dashboard ACS"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(pacman)
+p_load(openxlsx)
+p_load(scales)
+p_load(readxl)
+p_load(WriteXLS)
+p_load(ggthemes)
+p_load(RColorBrewer)
+p_load(lubridate)
+p_load(caret)
+p_load(tidyverse)
+p_load(here)
+p_load(googlesheets4)
+p_load(DescTools)
+p_load(obAnalytics)
+p_load(collapse)
+p_load(tictoc)
+p_load(directlabels)
+p_load(zoo)
+p_load(kableExtra)
+p_load(vroom)
+p_load(janitor)
+p_load(msrpack)
+p_load(ggmap)
+p_load(patchwork)
+p_load(esquisse)
+p_load(flexdashboard)
+p_load(reactable)
+
+Sys.setenv(TZ="America/Recife")
+options(tz="America/Recife")
+Sys.getenv("TZ")
+options(scipen = 999999)
+Sys.setlocale("LC_TIME", "pt_BR")
+
+
+
+acs <- read_rds(file = "../bin/acs.rds")
+acs_ativos <- read_rds(file = "../bin/acs_ativos.rds")
+us <- read_rds(file = "../bin/us.rds")
+demanda <- read_rds(file = "../bin/demanda.rds")
+acs_demanda <- read_rds(file = "../bin/acs_demanda.rds")
+us_balanco <- read_rds(file = "../bin/us_balanco.rds")
+final <- read_rds(file = "../bin/final.rds")
+
+
+vagas_df <- us_balanco %>% 
+  filter(CLT_necessarios > 0)
+
+vagas_clt <- sum(vagas_df$CLT_necessarios)
+
+us %>%
+  filter(acs_51 > 0) %>% 
+  pull(n_equipes) %>% sum()
+
+n_exedentes_em51 <-  us %>% 
+  select(acs_necessarios, acs_51) %>% 
+  mutate(
+    balanco = acs_necessarios - acs_51,
+    exedente = ifelse(acs_51 <= acs_necessarios, 0, acs_51 - acs_necessarios )
+  ) %>% 
+  pull(exedente) %>% sum
+
+clt_excedentes <- us %>% 
+  select(nome_limpo_us, acs_necessarios, acs_51, acs_imesf) %>% 
+  mutate(
+    neces_menos_51 = acs_necessarios - acs_51,
+    balanco = acs_necessarios - acs_51 - acs_imesf
+  ) %>% 
+  filter(balanco < 0)
+
+clt_excedentes
+sum(clt_excedentes$clt_necessarios)
+
+us_balanco2 <- us %>% 
+  select(nome_limpo_us, precisa = acs_necessarios, em51 = acs_51, clt = acs_imesf) %>% 
+  mutate(
+    clt = replace_na(clt,replace = 0),
+    tem = em51 + clt,
+    balanco = em51 + clt - precisa,
+    flag_completa_em51 = precisa == em51,
+    flag_excedente_em51 = precisa < em51,
+    flag_completa = balanco >= 0,
+    balanco_em51 = precisa - em51,
+    vagas_apos_subtrair_em51 = if_else(precisa >= em51, 
+                                       precisa - em51, 0),
+    vagas_apos_subtrair_clt = if_else(vagas_apos_subtrair_em51 >= clt,
+                                      vagas_apos_subtrair_em51 - clt, 0)
+    
+  ) %>% 
+  relocate(tem, .after = precisa) %>% 
+  relocate(balanco, .after = tem) %>% 
+  relocate(balanco_em51, .after = em51) %>% 
+  relocate(vagas_apos_subtrair_em51, .before = clt) %>% 
+  relocate(vagas_apos_subtrair_clt, .after = clt)
+
+
+# Calculo do Excedente de CLT
+us_balanco2 %>% 
+  pull(vagas_apos_subtrair_clt) %>% sum()
+
+
+```
+
+
+
+
+
+
+
+```{r}
+n_equipes_esf <- sum(us$n_equipes)
+
+n_acs_ativos <- acs_ativos %>% 
+  filter(!is.na(admissao)) %>% nrow()
+
+n_acs_necessarios <- sum(us_balanco$acs_necessarios)
+
+
+```
+
+
+Quantidades
+=================================================================================
+
+Row {data-width=650}
+-----------------------------------------------------------------------
+
+
+### Quantidade de Equipes ESF
+
+```{r}
+
+valueBox(glue::glue("{n_equipes_esf} Equipes"), 
+         icon = "fa-user-md")
+```
+
+
+### Total de ACSs necessários
+
+```{r}
+valueBox(glue::glue("{n_acs_necessarios} ACS"), icon = "fa-users")
+```
+
+
+
+### Quantidade de ACS Ativos
+
+```{r}
+valueBox(glue::glue("{n_acs_ativos} ativos"), 
+         icon = "fa-power-off")
+```
+
+
+
+
+
+Row {data-width=350}
+-----------------------------------------------------------------------
+
+
+### Contratos via EM51
+
+```{r}
+
+
+n_acs_em51 <- acs_ativos %>% 
+  filter(rescisao == "EM51") %>% nrow()
+
+valueBox(glue::glue("{n_acs_em51} EM51"), 
+         icon = "fa-user-shield",
+         color = "seagreen")
+```
+
+
+### Contratos via CLT
+
+```{r}
+
+n_acs_CLT <- acs_ativos %>% 
+  filter(is.na(rescisao)) %>% nrow()
+
+valueBox(glue::glue("{n_acs_CLT} CLT"), 
+         icon = "fa-user-edit", 
+         color = "orchid")
+```
+
+### Excedentes contratados CLT
+
+```{r}
+
+n_desligavel <- sum(final$demitir)
+
+
+valueBox(n_desligavel, 
+         icon = "fa-user-times",
+         color =  "orangered", href = "#Tabela")
+```
+
+
+Row {data-width=350}
+-----------------------------------------------------------------------
+
+### EM51 que completam ESF
+
+```{r}
+n_em51_completam_esf <- n_acs_em51 - n_exedentes_em51
+valueBox(glue::glue("{n_em51_completam_esf} ESF"), 
+         icon = "fa-user-check",
+         color = "seagreen")
+
+
+
+```
+
+
+### Excedentes da EM51
+
+```{r}
+
+valueBox(glue::glue("{n_exedentes_em51} exedentes"), 
+         icon = "fa-user-times",
+         color = "seagreen")
+```
+
+
+
+
+### CLTs que completam equipes
+
+```{r}
+valueBox(glue::glue("{n_acs_CLT - n_desligavel} ACS"), 
+         icon = "fa-user-check",
+         color = "orchid")
+``` 
+
+
+### Vagas abertas para completar equipes
+
+```{r}
+valueBox(glue::glue("{vagas_clt} vagas"), 
+         icon = "fa-dot-circle",
+         color = "orchid")
+```
+
+
+
+### Equipes SEM ACS
+
+```{r}
+
+n_equipes_sem_ACS <- sum(!us_balanco2$flag_completa)
+valueBox(glue::glue("{n_equipes_sem_ACS} Equipes"), 
+         icon = "fa-search",
+         color =  "orangered")
+```
+
+### 
+
+```{r}
+valueBox(" ", 
+         icon = "fa-",
+         color =  "pink")
+```
+
+
+Row {data-width=350}
+-----------------------------------------------------------------------
+
+### Equipes sem ACS
+
+```{r}
+
+```
+
+
+### Unidades com vagas ACS em Aberto
+
+```{r}
+
+
+vagas_df %>% 
+  select(nome_limpo_us, vagas = CLT_necessarios) %>% 
+reactable(
+  columns = list(
+    nome_limpo_us = colDef(name = "Nome da Unidade", minWidth = 200),
+    vagas = colDef(name = "Vagas", minWidth = 80, align = "center")
+  ),
+  bordered = TRUE,
+  highlight = TRUE, 
+  striped = TRUE,
+  searchable = TRUE,
+  defaultPageSize = 15,
+  minRows = 15,
+  showPageSizeOptions = TRUE
+)
+
+
+
+```
+
+Tabela
+=================================================================================
+### Tabela de Agentes Comunitarios
+
+```{r}
+
+final %>% 
+  select(-necessidade_ajustada) %>% 
+reactable(
+  columns = list(
+    nome_limpo_acs = colDef(name = "Unidade de Saúde",
+                            minWidth = 270,
+                            headerStyle = list(background = "lightblue")),
+  
+    nome = colDef(name = "Nome do ACS",
+                  minWidth = 350),
+    
+    alocados = colDef(name = "Alocados",
+                      minWidth = 80,
+                      align = "center"),
+    
+    acs_necessarios = colDef(name = "Necessidade",
+                      minWidth = 100,
+                      align = "center"),
+    
+    contrato = colDef(name = "Tipo de\nContrato",
+                      minWidth = 80,
+                      align = "center"),
+    
+    admissao = colDef(name = "Admissão",
+                      minWidth = 120,
+                      align = "center"),
+    
+    
+    
+    
+    ordem = colDef(name = "Ranking",
+                      minWidth = 100,
+                      align = "center"),
+    
+    demitir = colDef(name = "Possibilidade\nDesligamento",
+                      minWidth = 120,
+                      align = "center")
+    
+  ),
+  bordered = TRUE,
+  highlight = TRUE, 
+  striped = TRUE,
+  searchable = TRUE,
+  groupBy = "nome_limpo_acs",
+  defaultPageSize = 15,
+  minRows = 15,
+  showPageSizeOptions = TRUE
+)
+
+```
+
+Unidades
+=================================================================================
+
+
+```{r}
+
+us %>% 
+  select(gd, cnes, nome_limpo_us, acs_necessarios, acs_51, acs_imesf) %>% 
+reactable(
+  columns = list(
+    gd = colDef(name = "GD",
+                minWidth = 25),
+    
+    cnes = colDef(name = "CNES",
+                 minWidth = 35),
+    
+    nome_limpo_us = colDef(name = "Nome da Unidade",
+                 minWidth = 250), 
+    
+    acs_necessarios = colDef(name = "Necessidade\nde agentes",
+                             minWidth = 90, align = "center"),
+    acs_51 = colDef(name = "EM51",
+                    minWidth = 50, align = "center"),
+    
+    acs_imesf = colDef(name = "IMESF",
+                    minWidth = 50, align = "center")
+    
+    
+    
+  ),
+  
+  bordered = TRUE,
+  highlight = TRUE, 
+  striped = TRUE,
+  searchable = TRUE,
+  defaultPageSize = 20,
+  minRows = 20,
+  showPageSizeOptions = TRUE
+)
+
+    
+```
+
+```{r}
+
+```
+
+
+Equipes
+=================================================================================
+
+
+```{r}
+demanda %>% 
+  reactable(
+    
+    columns = list(
+      nome_limpo_us = colDef(name = "Nome da Unidade", minWidth = 200),
+      no_equipe = colDef(name = "Número\nEquipe", minWidth = 80, align = "center"),
+      equipe = colDef(name = "Equipe", minWidth = 300)
+      
+      
+    ),
+    groupBy = "nome_limpo_us",
+    bordered = TRUE,
+    highlight = TRUE, 
+    striped = TRUE,
+    searchable = TRUE,
+    defaultPageSize = 20,
+    minRows = 20,
+    showPageSizeOptions = TRUE
+  )
+
+```
+
