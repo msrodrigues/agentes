@@ -202,7 +202,7 @@ n_desligavel <- sum(final$demitir)
 
 valueBox(n_desligavel, 
          icon = "fa-user-times",
-         color =  "orangered", href = "#Tabela")
+         color =  "orangered", href = "#tabela")
 ```
 
 
