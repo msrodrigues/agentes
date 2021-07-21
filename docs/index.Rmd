@@ -40,8 +40,10 @@ options(tz="America/Recife")
 Sys.getenv("TZ")
 options(scipen = 999999)
 Sys.setlocale("LC_TIME", "pt_BR")
+```
 
 
+```{r Carregamentos, include=FALSE}
 # Carregamento dos dados
 acs <- read_rds(file = "../bin/acs.rds")
 acs_ativos <- read_rds(file = "../bin/acs_ativos.rds")
@@ -50,7 +52,7 @@ demanda <- read_rds(file = "../bin/demanda.rds")
 acs_demanda <- read_rds(file = "../bin/acs_demanda.rds")
 us_balanco <- read_rds(file = "../bin/us_balanco.rds")
 final <- read_rds(file = "../bin/final.rds")
-
+equipes_cnes <- read_rds(file = "../../../data/cnes/bin/profissionais_aps.rds")
 
 vagas_df <- us_balanco %>% 
   filter(CLT_necessarios > 0)
@@ -461,6 +463,50 @@ reactable(
 Equipes
 =================================================================================
 
+row {.tabset}
+------------------------
+
+
+### Equipes CNES
+
+
+```{r}
+variavies <- names(equipes_cnes)
+equipes_cnes %>% 
+  select(
+    co_cnes, no_fantasia, co_unidade,
+    seq_equipe, no_referencia, co_unidade, tp_equipe,
+    no_profissional, co_cbo, ds_atividade_profissional, co_profissional_sus, qt_carga_horaria_ambulatorial
+  ) %>% 
+  arrange(no_fantasia, no_referencia, no_profissional) %>% 
+reactable(
+  columns = list(
+    no_fantasia = colDef(name = "Nome da Unidade", minWidth = 400),
+    no_referencia = colDef(name = "Equipe", minWidth = 320),
+    co_cnes = colDef(name = "CNES", minWidth = 70),
+    seq_equipe = colDef(name = "INE"),
+    co_profissional_sus = colDef(name = "Código Profissional", minWidth = 150),
+    co_unidade = colDef(name = "Código Unidade", minWidth = 120),
+    co_cbo = colDef(name = "CBO", minWidth = 70),
+    tp_equipe = colDef(name = "Tipo", minWidth = 70),
+    ds_atividade_profissional = colDef(name = "Atividade", minWidth = 300),
+    qt_carga_horaria_ambulatorial = colDef(name = "CH", minWidth = 70),
+    no_profissional = colDef(name = "Nome do profissional", minWidth = 350)
+  ),
+  groupBy = c("no_fantasia", "no_referencia"),
+  bordered = TRUE,
+  highlight = TRUE, 
+  striped = TRUE,
+  searchable = TRUE,
+  defaultPageSize = 20,
+  showPageSizeOptions = TRUE
+)
+  
+
+
+```
+
+### Equipes e ACS
 
 ```{r}
 demanda %>% 
@@ -484,4 +530,6 @@ demanda %>%
   )
 
 ```
+
+
 
