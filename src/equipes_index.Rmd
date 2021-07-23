@@ -1,0 +1,73 @@
+---
+title: "Equipes"
+output: html_notebook
+---
+
+
+row {.tabset}
+------------------------
+
+
+### Equipes CNES
+
+
+```{r}
+variavies <- names(equipes_cnes)
+equipes_cnes %>% 
+  select(
+    co_cnes, no_fantasia, co_unidade,
+    seq_equipe, no_referencia, co_unidade, tp_equipe,
+    no_profissional, co_cbo, ds_atividade_profissional, co_profissional_sus, qt_carga_horaria_ambulatorial
+  ) %>% 
+  arrange(no_fantasia, no_referencia, no_profissional) %>% 
+reactable(
+  columns = list(
+    no_fantasia = colDef(name = "Nome da Unidade", minWidth = 400),
+    no_referencia = colDef(name = "Equipe", minWidth = 320),
+    co_cnes = colDef(name = "CNES", minWidth = 70),
+    seq_equipe = colDef(name = "INE"),
+    co_profissional_sus = colDef(name = "Código Profissional", minWidth = 150),
+    co_unidade = colDef(name = "Código Unidade", minWidth = 120),
+    co_cbo = colDef(name = "CBO", minWidth = 70),
+    tp_equipe = colDef(name = "Tipo", minWidth = 70),
+    ds_atividade_profissional = colDef(name = "Atividade", minWidth = 300),
+    qt_carga_horaria_ambulatorial = colDef(name = "CH", minWidth = 70),
+    no_profissional = colDef(name = "Nome do profissional", minWidth = 350)
+  ),
+  groupBy = c("no_fantasia", "no_referencia"),
+  bordered = TRUE,
+  highlight = TRUE, 
+  striped = TRUE,
+  searchable = TRUE,
+  defaultPageSize = 20,
+  showPageSizeOptions = TRUE
+)
+  
+
+
+```
+
+### Equipes e ACS
+
+```{r}
+demanda %>% 
+  reactable(
+    
+    columns = list(
+      nome_limpo_us = colDef(name = "Nome da Unidade", minWidth = 200),
+      no_equipe = colDef(name = "Número\nEquipe", minWidth = 80, align = "center"),
+      equipe = colDef(name = "Equipe", minWidth = 300)
+      
+      
+    ),
+    groupBy = "nome_limpo_us",
+    bordered = TRUE,
+    highlight = TRUE, 
+    striped = TRUE,
+    searchable = TRUE,
+    defaultPageSize = 20,
+    minRows = 20,
+    showPageSizeOptions = TRUE
+  )
+
+```
