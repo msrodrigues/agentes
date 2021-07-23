@@ -1,0 +1,78 @@
+---
+title: "Tabelas"
+output: html_notebook
+---
+
+
+
+row{.tabset}
+--------------------------------------------------------
+### Unidades com seus Agentes Comunitarios 
+
+```{r}
+
+final %>% 
+  select(-necessidade_ajustada) %>% 
+reactable(
+  columns = list(
+    nome_limpo_acs = colDef(name = "Unidade de Saúde",
+                            minWidth = 270,
+                            headerStyle = list(background = "lightblue")),
+  
+    nome = colDef(name = "Nome do ACS",
+                  minWidth = 350),
+    
+    alocados = colDef(name = "Alocados",
+                      minWidth = 80,
+                      align = "center"),
+    
+    acs_necessarios = colDef(name = "Necessidade",
+                      minWidth = 100,
+                      align = "center"),
+    
+    contrato = colDef(name = "Tipo de\nContrato",
+                      minWidth = 80,
+                      align = "center"),
+    
+    admissao = colDef(name = "Admissão",
+                      minWidth = 120,
+                      align = "center"),
+    
+    
+    
+    
+    ordem = colDef(name = "Ranking",
+                      minWidth = 100,
+                      align = "center"),
+    
+    demitir = colDef(name = "Possibilidade\nDesligamento",
+                      minWidth = 120,
+                      align = "center")
+    
+  ),
+  bordered = TRUE,
+  highlight = TRUE, 
+  striped = TRUE,
+  searchable = TRUE,
+  groupBy = "nome_limpo_acs",
+  defaultPageSize = 15,
+  minRows = 15,
+  showPageSizeOptions = TRUE
+)
+
+```
+
+### Equipes sem ACS 
+
+
+```{r}
+
+demanda %>% 
+  nest(no_equipe, equipe, ) %>% 
+  mutate(
+    vagas = map_dbl(data, nrow)
+  ) %>% reactable()
+
+
+```
+

@@ -146,7 +146,7 @@ n_acs_necessarios <- sum(us_balanco$acs_necessarios)
 Quantidades
 =================================================================================
 
-Row {data-width=650}
+Números Globais {data-width=650}
 -----------------------------------------------------------------------
 
 
@@ -178,7 +178,7 @@ valueBox(glue::glue("{n_acs_ativos} ativos"),
 
 
 
-Row {data-width=350}
+Números de EM51 e CLT {data-width=350}
 -----------------------------------------------------------------------
 
 
@@ -221,7 +221,7 @@ valueBox(n_desligavel,
 ```
 
 
-Row {data-width=350}
+Completitude das Equipes {data-width=350}
 -----------------------------------------------------------------------
 
 ### EM51 que completam ESF
@@ -288,7 +288,7 @@ valueBox(glue::glue("{acs_para_completar_1_por_equipe} ACS "),
 ```
 
 
-Row {data-width=350}
+ {data-width=350}
 -----------------------------------------------------------------------
 
 ### Quantidade de ACS para completar equipes
@@ -341,126 +341,19 @@ reactable(
 Tabelas 
 =================================================================================
 
-
-row{.tabset}
---------------------------------------------------------
-### Unidades com seus Agentes Comunitarios 
-
-```{r}
-
-final %>% 
-  select(-necessidade_ajustada) %>% 
-reactable(
-  columns = list(
-    nome_limpo_acs = colDef(name = "Unidade de Saúde",
-                            minWidth = 270,
-                            headerStyle = list(background = "lightblue")),
-  
-    nome = colDef(name = "Nome do ACS",
-                  minWidth = 350),
-    
-    alocados = colDef(name = "Alocados",
-                      minWidth = 80,
-                      align = "center"),
-    
-    acs_necessarios = colDef(name = "Necessidade",
-                      minWidth = 100,
-                      align = "center"),
-    
-    contrato = colDef(name = "Tipo de\nContrato",
-                      minWidth = 80,
-                      align = "center"),
-    
-    admissao = colDef(name = "Admissão",
-                      minWidth = 120,
-                      align = "center"),
-    
-    
-    
-    
-    ordem = colDef(name = "Ranking",
-                      minWidth = 100,
-                      align = "center"),
-    
-    demitir = colDef(name = "Possibilidade\nDesligamento",
-                      minWidth = 120,
-                      align = "center")
-    
-  ),
-  bordered = TRUE,
-  highlight = TRUE, 
-  striped = TRUE,
-  searchable = TRUE,
-  groupBy = "nome_limpo_acs",
-  defaultPageSize = 15,
-  minRows = 15,
-  showPageSizeOptions = TRUE
-)
+```{r tabelas, child="../src/tabelas_index.Rmd"}
 
 ```
 
-### Equipes sem ACS 
 
-
-```{r}
-
-demanda %>% 
-  nest(no_equipe, equipe, ) %>% 
-  mutate(
-    vagas = map_dbl(data, nrow)
-  ) %>% reactable()
-
-
-```
 
 
 Unidades
 =================================================================================
 
-
-```{r}
-
-us %>% 
-  select(gd, cnes, nome_limpo_us, acs_necessarios, acs_51, acs_imesf) %>% 
-reactable(
-  columns = list(
-    gd = colDef(name = "GD",
-                minWidth = 25),
-    
-    cnes = colDef(name = "CNES",
-                 minWidth = 35),
-    
-    nome_limpo_us = colDef(name = "Nome da Unidade",
-                 minWidth = 250), 
-    
-    acs_necessarios = colDef(name = "Necessidade\nde agentes",
-                             minWidth = 90, align = "center"),
-    acs_51 = colDef(name = "EM51",
-                    minWidth = 50, align = "center"),
-    
-    acs_imesf = colDef(name = "IMESF",
-                    minWidth = 50, align = "center")
-    
-    
-    
-  ),
-  
-  bordered = TRUE,
-  highlight = TRUE, 
-  striped = TRUE,
-  searchable = TRUE,
-  defaultPageSize = 20,
-  minRows = 20,
-  showPageSizeOptions = TRUE
-)
-
-    
-```
-
-```{r}
+```{r unidades, child="../src/unidades_index.Rmd"}
 
 ```
-
 
 Equipes
 =================================================================================

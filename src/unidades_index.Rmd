@@ -1,0 +1,49 @@
+---
+title: "Unidades"
+output: html_notebook
+---
+
+
+```{r}
+
+us %>% 
+  select(gd, cnes, nome_limpo_us, acs_necessarios, acs_51, acs_imesf) %>% 
+reactable(
+  columns = list(
+    gd = colDef(name = "GD",
+                minWidth = 25),
+    
+    cnes = colDef(name = "CNES",
+                 minWidth = 35),
+    
+    nome_limpo_us = colDef(name = "Nome da Unidade",
+                 minWidth = 250), 
+    
+    acs_necessarios = colDef(name = "Necessidade\nde agentes",
+                             minWidth = 90, align = "center"),
+    acs_51 = colDef(name = "EM51",
+                    minWidth = 50, align = "center"),
+    
+    acs_imesf = colDef(name = "IMESF",
+                    minWidth = 50, align = "center")
+    
+    
+    
+  ),
+  
+  bordered = TRUE,
+  highlight = TRUE, 
+  striped = TRUE,
+  searchable = TRUE,
+  defaultPageSize = 20,
+  minRows = 20,
+  showPageSizeOptions = TRUE
+)
+
+    
+```
+
+```{r}
+
+```
+
