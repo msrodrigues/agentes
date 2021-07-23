@@ -31,15 +31,14 @@ options(scipen = 999999)
 Sys.setlocale("LC_TIME", "pt_BR")
 
 
-# Carregamento da planilha dos ACS do IMESD
-
+# Carregamento da planilha dos ACS do IMESF - Fonte APS, planilha da Carol
 acs_raw <- range_read("1EjEgzJrzvhPpQ2QoURoBkCDovwsA2b7RVtEmHMSknoo", sheet = "Todos ACS", col_types = "c") %>% 
   clean_names() 
-sort(unique(acs_raw$centro_de_custo))
-acs_raw %>% 
-  filter(grepl("Indígena",centro_de_custo)) %>% 
-  select(centro_de_custo)
 
+# Reviso os centros de Custos únicos
+sort(unique(acs_raw$centro_de_custo)) %>% write.xlsx(file = "report/centros_de_custo.xlsx")
+
+# Tabela dos Agentes ajustada
 acs <- acs_raw %>% 
   mutate(
     admissao = mdy(admissao),
@@ -57,7 +56,11 @@ acs <- acs_raw %>%
     nome_limpo_acs = str_remove(nome_limpo_acs, " - GD.*$")
     
   )
-
+acs %>% 
+  relocate(nome_limpo_acs, .before = nome) %>% 
+  relocate(centro_de_custo, .before = nome) %>% 
+  arrange(desc(nome_limpo_acs)) %>% write.xlsx("report/acs.xlsx")
+  
 
 # Somente ACS ativos
 acs_ativos <- acs %>% 
@@ -73,8 +76,6 @@ acs_ativos <- acs %>%
 us_raw <- range_read("191vkPIzTLcf3Jg0IW4I--S7J-VQW1sJaE61L02vxdIM",sheet = "Equipes por US") %>% 
   clean_names()
 
-us %>%
-  filter(grepl("TUCA", us_nome))
 us <- us_raw %>% 
   select(
     gd, 
@@ -101,6 +102,7 @@ us <- us_raw %>%
 
 # Join dos bancos dos ACS com as US
 acs_us <- left_join(acs, us, by = c("nome_limpo_acs" = "nome_limpo_us"), keep = TRUE)
+
 
 
 

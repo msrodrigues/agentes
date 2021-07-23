@@ -36,6 +36,7 @@ p_load(ggmap)
 p_load(patchwork)
 p_load(esquisse)
 
+
 Sys.setenv(TZ="America/Recife")
 options(tz="America/Recife")
 Sys.getenv("TZ")

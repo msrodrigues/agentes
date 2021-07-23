@@ -34,6 +34,7 @@ p_load(patchwork)
 p_load(esquisse)
 p_load(flexdashboard)
 p_load(reactable)
+p_load(glue)
 
 Sys.setenv(TZ="America/Recife")
 options(tz="America/Recife")
@@ -293,6 +294,7 @@ Row {data-width=350}
 ### Quantidade de ACS para completar equipes
 
 ```{r}
+
 
 acs_para_completar_1_por_equipe_df %>% 
   reactable( 
