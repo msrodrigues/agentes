@@ -55,6 +55,8 @@ us_balanco <- read_rds(file = "../bin/us_balanco.rds")
 final <- read_rds(file = "../bin/final.rds")
 equipes_cnes <- read_rds(file = "../../../data/cnes/bin/profissionais_aps.rds")
 
+
+
 vagas_df <- us_balanco %>% 
   filter(CLT_necessarios > 0)
 
@@ -132,8 +134,11 @@ acs_para_completar_1_por_equipe_df <- us %>%
 
 
 ```{r}
+
+# Calculo da quantidade de ESG
 n_equipes_esf <- sum(us$n_equipes)
 
+# Qauntitade de Agentes ativos
 n_acs_ativos <- acs_ativos %>% 
   filter(!is.na(admissao)) %>% nrow()
 

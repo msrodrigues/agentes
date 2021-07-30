@@ -38,11 +38,14 @@ acs_raw <- range_read("1EjEgzJrzvhPpQ2QoURoBkCDovwsA2b7RVtEmHMSknoo", sheet = "T
 # Reviso os centros de Custos únicos
 sort(unique(acs_raw$centro_de_custo)) %>% write.xlsx(file = "report/centros_de_custo.xlsx")
 
+acs_raw$data_de_nascimento
 # Tabela dos Agentes ajustada
 acs <- acs_raw %>% 
   mutate(
     admissao = mdy(admissao),
     flag_ativo = is.na(rescisao) | rescisao == "EM51",
+    dt_nascimento = dmy(data_de_nascimento),
+    idade = age(dt_nascimento),
     
     # Recodifico nomes de unidades que modificaram
     centro_de_custo = case_when(
@@ -50,7 +53,7 @@ acs <- acs_raw %>%
       centro_de_custo == "US Vila SESC - GDLN" ~ "US SESC - GDLN",
       centro_de_custo == "US Maria da Conceição - GDPLP"  ~ "MARIA DA CONCEICAO MARCELO MARTINS MOREIRA",
       centro_de_custo == "US Saúde Indígena - GDPLP" ~ "US Indígena",
-      TRUE ~ centro_de_custo
+      TRUE ~ centro_de_custo,
     ),
     nome_limpo_acs = rm_accent(toupper(str_remove(string = centro_de_custo, pattern = "^US |^ESF |^CF "))),
     nome_limpo_acs = str_remove(nome_limpo_acs, " - GD.*$")
@@ -178,21 +181,22 @@ acs_demanda <- acs_ativos %>%
 existentes <- acs_ativos %>% 
   count(nome_limpo_acs, name = "alocados")
 
-set.seed(45)
+#set.seed(45)
 
-idades <- round(rnorm(n = 551, mean = 55, sd = 10))
+#idades <- round(rnorm(n = 551, mean = 55, sd = 10))
 
-filhos <- abs(round(rnorm(n = 551, mean = 1, sd = 1)) )
+#filhos <- abs(round(rnorm(n = 551, mean = 1, sd = 1)) )
 
 
 ativos <- acs_ativos %>% 
   left_join(us, by = c("nome_limpo_acs" = "nome_limpo_us")) %>% 
   left_join(existentes, by = "nome_limpo_acs") %>% 
-  mutate(idade = idades,
-         filhos = filhos, 
+  mutate(#idade = idades,
+         #filhos = filhos, 
          contrato = ifelse(is.na(rescisao), "CLT", "EM51"),
          contrato = factor(contrato, levels = c("EM51","CLT"), ordered = TRUE)
   )
+
 
 
 final <- ativos %>% 
@@ -229,3 +233,4 @@ us %>%
   mutate(
     vagas = acs_necessarios
   )
+
