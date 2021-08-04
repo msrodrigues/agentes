@@ -44,7 +44,6 @@ reactable(
 )
   
 
-
 ```
 
 ### Equipes e ACS
