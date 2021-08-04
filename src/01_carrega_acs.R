@@ -87,12 +87,10 @@ us <- us_raw %>%
     n_equipes = equipes, 
     n_acs_por_equipe = acs_equipe, 
     acs_51 = emenda_51, 
-    acs_imesf = quantidades_acs_no_imesf
+    acs_imesf = quantidades_acs_no_imesf,
+    acs_necessarios = total_acs
   ) %>% 
   mutate(
-    acs_necessarios = if_else(n_equipes * n_acs_por_equipe> 5, 
-                              (n_equipes * n_acs_por_equipe) - 1, 
-                              n_equipes * n_acs_por_equipe),
     acs_51 = replace(acs_51, is.na(acs_51), 0),                             
     cnes = factor(cnes),
     n_equipes = replace(n_equipes, is.na(n_equipes), 0),
