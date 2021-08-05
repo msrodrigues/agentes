@@ -60,31 +60,6 @@ reactable(
   showPageSizeOptions = TRUE
 )
 
-final %>% write.xlsx(file = "../report/final.xlsx")
-
-final %>% 
-  count(nome_limpo_acs, contrato, acs_necessarios) %>% 
-  pivot_wider(names_from = contrato, values_from = n) %>% clean_names() %>% 
-  mutate(
-    cargos = ifelse(is.na(em51), 
-                    ifelse(acs_necessarios > clt, clt, acs_necessarios),
-                    ifelse(em51 > acs_necessarios, em51, acs_necessarios)
-                    
-    )
-  ) %>% write.xlsx(file = "../report/cargos_a_criar.xlsx")
-
-
-final %>% 
-  count(nome_limpo_acs, contrato, acs_necessarios) %>% 
-  pivot_wider(names_from = contrato, values_from = n) %>% clean_names() %>% 
-  mutate(
-    cargos = ifelse(is.na(em51), 
-                    ifelse(acs_necessarios > clt, clt, acs_necessarios),
-                    ifelse(em51 > acs_necessarios, em51, acs_necessarios)
-                    
-    )
-  ) %>% 
-  pull(cargos) %>% sum(na.rm = TRUE)
 
 ```
 
