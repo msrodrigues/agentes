@@ -3,13 +3,9 @@ title: "Equipes"
 output: html_notebook
 ---
 
-
-row {.tabset}
-------------------------
-
+## row {.tabset}
 
 ### Equipes CNES
-
 
 ```{r}
 variavies <- names(equipes_cnes)

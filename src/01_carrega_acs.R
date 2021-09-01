@@ -36,7 +36,7 @@ acs_raw <- range_read("1EjEgzJrzvhPpQ2QoURoBkCDovwsA2b7RVtEmHMSknoo", sheet = "T
   clean_names() 
 
 # Reviso os centros de Custos únicos
-sort(unique(acs_raw$centro_de_custo)) %>% write.xlsx(file = "report/centros_de_custo.xlsx")
+sort(unique(acs_raw$centro_de_custo)) %>% write.xlsx(file = "report/centros_de_custo.xlsx", overwrite = TRUE)
 
 acs_raw$data_de_nascimento
 # Tabela dos Agentes ajustada
@@ -62,7 +62,7 @@ acs <- acs_raw %>%
 acs %>% 
   relocate(nome_limpo_acs, .before = nome) %>% 
   relocate(centro_de_custo, .before = nome) %>% 
-  arrange(desc(nome_limpo_acs)) %>% write.xlsx("report/acs.xlsx")
+  arrange(desc(nome_limpo_acs)) %>% write.xlsx("report/acs.xlsx", overwrite = TRUE)
   
 
 # Somente ACS ativos

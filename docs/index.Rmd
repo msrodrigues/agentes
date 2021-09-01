@@ -6,7 +6,7 @@ output:
     vertical_layout: fill
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 library(pacman)
 p_load(openxlsx)
 p_load(scales)
@@ -41,12 +41,10 @@ options(tz="America/Recife")
 Sys.getenv("TZ")
 options(scipen = 999999)
 Sys.setlocale("LC_TIME", "pt_BR")
-```
 
 
-```{r Carregamentos, include=FALSE}
-# Carregamento dos dados
-acs <- read_rds(file = "../bin/acs.rds")
+
+acs <-  read_rds(file = "../bin/acs.rds")
 acs_ativos <- read_rds(file = "../bin/acs_ativos.rds")
 us <- read_rds(file = "../bin/us.rds")
 demanda <- read_rds(file = "../bin/demanda.rds")
@@ -54,7 +52,11 @@ acs_demanda <- read_rds(file = "../bin/acs_demanda.rds")
 us_balanco <- read_rds(file = "../bin/us_balanco.rds")
 final <- read_rds(file = "../bin/final.rds")
 equipes_cnes <- read_rds(file = "../../../data/cnes/bin/profissionais_aps.rds")
+```
 
+
+
+```{r, include = FALSE}
 
 
 vagas_df <- us_balanco %>% 
@@ -257,6 +259,7 @@ valueBox(glue::glue("{n_exedentes_em51} ACS"),
 ### CLTs que completam equipes
 
 ```{r}
+
 valueBox(glue::glue("{n_acs_CLT - n_desligavel} ACS"), 
          icon = "fa-user-check",
          color = "orchid")
